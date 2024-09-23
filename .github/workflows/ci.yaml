@@ -1,0 +1,12 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  initial-testing:
+    name: Checks if this action works
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./

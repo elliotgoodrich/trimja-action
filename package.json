@@ -1,0 +1,30 @@
+{
+  "name": "trimja-action",
+  "version": "0.0.1",
+  "description": "A GitHub Action to download, setup, and run trimja to reduce the size of your ninja build file",
+  "main": "dist/index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elliotgoodrich/trimja-action.git"
+  },
+  "keywords": [
+    "GitHub",
+    "Action",
+    "ninja",
+    "trimja"
+  ],
+  "author": "Elliot Goodrich",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elliotgoodrich/trimja-action/issues"
+  },
+  "homepage": "https://github.com/elliotgoodrich/trimja-action#readme",
+  "devDependencies": {
+    "@ninjutsu-build/biome": "^0.10.0",
+    "@ninjutsu-build/core": "^0.9.0",
+    "@ninjutsu-build/tsc": "^0.14.0"
+  }
+}
