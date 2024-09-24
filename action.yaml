@@ -4,4 +4,4 @@ author: 'Elliot Goodrich'
 
 runs:
   using: 'node20'
-  main: 'dist/index.mjs'
+  main: 'dist/entry.cjs'
