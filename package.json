@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "description": "A GitHub Action to download, setup, and run trimja to reduce the size of your ninja build file",
   "main": "dist/index.mjs",
-  "scripts": {
-    "build": "node configure.mjs && ninja"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/elliotgoodrich/trimja-action.git"

@@ -1,3 +1,4 @@
+import { addPath, debug, error, info } from "@actions/core";
 import { downloadTool, extractTar } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
@@ -9,23 +10,23 @@ const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${v
 
 (async () => {
   if (process.platform === "win32") {
-    console.log("Windows not yet supported");
+    error("Windows not yet supported");
   } else if (process.platform === "darwin") {
-    console.log("MacOS not yet supported");
+    error("MacOS not yet supported");
   } else {
     const URL = `${URLBase}-Linux.tar.gz`;
-    console.log(`Starting Download of ${URL}`);
+    debug(`Starting Download of ${URL}`);
     const trimjaTgz = await downloadTool(URL);
+    debug("Extracting tar.gz");
     const trimjaFolder = await extractTar(trimjaTgz, "trimja-install");
-    console.log(`Extracted successfully to ${trimjaFolder}`);
-    console.log("ls");
-    const ls = await execFile("ls", null, { cwd: trimjaFolder });
-    console.log(ls.stdout);
+    debug(`Extracted successfully to ${trimjaFolder}`);
 
-    const child = await execFile(
-      join(trimjaFolder, `trimja-${version}-Linux`, "bin", "trimja"),
-      ["--version"],
-    );
-    console.log(child.stdout);
+    const trimjaDir = join(trimjaFolder, `trimja-${version}-Linux`, "bin");
+    info("$ trimja --version");
+    const child = await execFile(join(trimjaDir, "trimja"), ["--version"]);
+    info(child.stdout);
+
+    debug(`Adding ${trimjaDir} to the path`);
+    addPath(trimjaDir);
   }
 })();

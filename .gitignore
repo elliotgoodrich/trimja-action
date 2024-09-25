@@ -1,3 +1,4 @@
 .ninja/
 node_modules/
+dist/
 build.ninja

@@ -1,14 +1,22 @@
 name: CI
 
 on:
-  workflow_dispatch:
   push:
     branches: ["main"]
 
 jobs:
-  initial-testing:
-    name: Checks if this action works
+  build:
+    name: Build
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: npm ci
+      - run: node ninjutsu.mjs
+      - run: ninja -k 0
       - uses: ./
+      - run: trimja --help
