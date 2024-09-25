@@ -1,11 +1,11 @@
-import { addPath, debug, error, info } from "@actions/core";
+import { addPath, debug, error, getInput, info } from "@actions/core";
 import { downloadTool, extractTar } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
 const execFile = promisify(execFileCallback);
 
-const version = "0.1.1";
+const version = getInput("version", { required: true });
 const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}/trimja-${version}`;
 
 (async () => {

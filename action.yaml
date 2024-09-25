@@ -1,7 +1,11 @@
 name: 'trimja action'
 description: 'Download, setup, and runs trimja to reduce the size of your ninja build file'
 author: 'Elliot Goodrich'
-
+inputs:
+  version:
+    description: 'Version of trimja to install'
+    default: '0.1.1'
+    required: true
 runs:
   using: 'node20'
   main: 'dist/entry.cjs'

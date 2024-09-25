@@ -19,4 +19,6 @@ jobs:
       - run: node ninjutsu.mjs
       - run: ninja -k 0
       - uses: ./
+        with:
+          version: '0.1.1'
       - run: trimja --help
