@@ -8,4 +8,6 @@ inputs:
     required: true
 runs:
   using: 'node20'
-  main: 'dist/entry.cjs'
+  main: 'dist/main.cjs'
+  post: 'dist/post.cjs'
+  post-if: success()
