@@ -1,4 +1,5 @@
 import { addPath, debug, error, getInput, info } from "@actions/core";
+import { saveCache } from "@actions/cache";
 import { downloadTool, extractTar } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
@@ -14,6 +15,7 @@ const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${v
   } else if (process.platform === "darwin") {
     error("MacOS not yet supported");
   } else {
+    await saveCache(["doesnt.exist"], "TEST");
     const URL = `${URLBase}-Linux.tar.gz`;
     debug(`Starting Download of ${URL}`);
     const trimjaTgz = await downloadTool(URL);
