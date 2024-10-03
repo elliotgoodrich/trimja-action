@@ -22,5 +22,5 @@ jobs:
       - run: ninja -k 0
       - uses: ./
         with:
-          version: '0.1.1'
-      - run: trimja --help
+          version: '0.2.0'
+      - run: ninja -k 0 # Run ninja again to make sure there's nothing to do
