@@ -4,10 +4,13 @@ author: 'Elliot Goodrich'
 inputs:
   version:
     description: 'Version of trimja to install'
-    default: '0.2.0'
+    default: '0.3.0'
   path:
     description: 'Path to the ninja build file'
     default: './build.ninja'
+  explain:
+    description: 'Whether to pass --explain to trimja'
+    default: 'false'
 runs:
   using: 'node20'
   main: 'dist/main.m.cjs'

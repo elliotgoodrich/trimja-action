@@ -88,13 +88,17 @@ try {
     const affectedFilesFile = join("trimja-cache", "affected.txt");
     await writeFile(affectedFilesFile, affected.stdout);
 
-    info(`trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write`);
+    const explain = getInput("explain") === "true" ? "--explain" : "";
+    info(
+      `trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write ${explain}`,
+    );
     await execFile("trimja", [
       "--file",
       ninjaFile,
       "--affected",
       affectedFilesFile,
       "--write",
+      explain,
     ]);
   })();
 } catch (e) {
