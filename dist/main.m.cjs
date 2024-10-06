@@ -59921,7 +59921,6 @@ var import_node_util = require("util");
 var import_node_path2 = require("path");
 var import_node_child_process = require("child_process");
 var import_promises = require("fs/promises");
-var import_node_path3 = require("path");
 
 // .ninja/common.mjs
 var import_node_path = require("path");
@@ -59957,8 +59956,8 @@ try {
       ninjaFile,
       "--builddir"
     ]);
-    const builddir = (0, import_node_path3.normalize)(builddirOutput.stdout);
-    (0, import_core.info)(builddir.trimEnd());
+    const builddir = builddirOutput.stdout.trim();
+    (0, import_core.info)(builddir);
     const variablesForPostFile = process.env.GITHUB_STATE;
     if (variablesForPostFile === void 0) {
       throw new Error("'GITHUB_STATE' environment variable not set");

@@ -6,7 +6,6 @@ import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
 import { appendFile, writeFile } from "node:fs/promises";
-import { normalize } from "node:path";
 import { archive } from "./common.mjs";
 const execFile = promisify(execFileCallback);
 
@@ -44,8 +43,8 @@ try {
       ninjaFile,
       "--builddir",
     ]);
-    const builddir = normalize(builddirOutput.stdout);
-    info(builddir.trimEnd());
+    const builddir = builddirOutput.stdout.trim();
+    info(builddir);
     const variablesForPostFile = process.env.GITHUB_STATE;
     if (variablesForPostFile === undefined) {
       throw new Error("'GITHUB_STATE' environment variable not set");
