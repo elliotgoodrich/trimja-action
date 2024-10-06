@@ -1,5 +1,6 @@
 import { restoreCache } from "@actions/cache";
 import { addPath, getInput, info, setFailed, warning } from "@actions/core";
+import { exec } from "@actions/exec";
 import { downloadTool, extractTar } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
@@ -92,7 +93,7 @@ try {
     info(
       `trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write ${explain}`,
     );
-    await execFile("trimja", [
+    await exec("trimja", [
       "--file",
       ninjaFile,
       "--affected",

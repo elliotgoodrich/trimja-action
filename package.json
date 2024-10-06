@@ -8,7 +8,12 @@
     "type": "git",
     "url": "git+https://github.com/elliotgoodrich/trimja-action.git"
   },
-  "keywords": ["GitHub", "Action", "ninja", "trimja"],
+  "keywords": [
+    "GitHub",
+    "Action",
+    "ninja",
+    "trimja"
+  ],
   "author": "Elliot Goodrich",
   "license": "MIT",
   "bugs": {
@@ -17,6 +22,7 @@
   "homepage": "https://github.com/elliotgoodrich/trimja-action#readme",
   "devDependencies": {
     "@actions/cache": "^3.2.4",
+    "@actions/exec": "^1.1.1",
     "@actions/tool-cache": "^2.0.1",
     "@ninjutsu-build/biome": "^0.10.0",
     "@ninjutsu-build/core": "^0.9.0",
