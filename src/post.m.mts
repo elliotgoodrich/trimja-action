@@ -26,7 +26,6 @@ try {
     await mkdir("trimja-cache", { recursive: true });
     info(`Creating ${archive}`);
     await exec("tar", ["-czvf", archive, "-C", builddir, ...files]);
-    await exec("tar", ["-tf", archive]);
 
     const key = `TRIMJA-${HASH}`;
     info(`Saving cache '${key}'`);
