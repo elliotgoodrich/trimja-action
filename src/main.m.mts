@@ -11,19 +11,26 @@ const execFile = promisify(execFileCallback);
 
 function getPlatformVars(version: string): {
   filename: string;
+  ext: string;
   extract: (file: string, dest?: string) => Promise<string>;
 } {
   switch (process.platform) {
     case "win32":
-      return { filename: `trimja-${version}-win64.zip`, extract: extractZip };
+      return {
+        filename: `trimja-${version}-win64`,
+        ext: ".zip",
+        extract: extractZip,
+      };
     case "darwin":
       return {
-        filename: `trimja-${version}-Darwin.tar.gz`,
+        filename: `trimja-${version}-Darwin`,
+        ext: ".tar.gz",
         extract: extractTar,
       };
     case "linux":
       return {
-        filename: `trimja-${version}-Linux.tar.gz`,
+        filename: `trimja-${version}-Linux`,
+        ext: ".tar.gz",
         extract: extractTar,
       };
     default:
@@ -36,8 +43,8 @@ try {
     const version = getInput("version", { required: true });
     const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}`;
 
-    const { filename, extract } = getPlatformVars(version);
-    const URL = `${URLBase}/${filename}`;
+    const { filename, ext, extract } = getPlatformVars(version);
+    const URL = `${URLBase}/${filename}${ext}`;
     info(`Starting Download of ${URL}`);
     const trimjaArchive = await downloadTool(URL);
     info(`Extracting ${trimjaArchive}`);
