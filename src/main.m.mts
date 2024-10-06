@@ -63,6 +63,7 @@ try {
     }
 
     info("Extracting ninja files");
+    await exec("tar", ["-tf", archive]);
     await extractTar(archive, builddir);
     await exec("ls", ["-R", builddir]);
 

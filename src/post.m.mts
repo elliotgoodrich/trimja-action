@@ -1,12 +1,10 @@
 import { info, setFailed } from "@actions/core";
 import { saveCache } from "@actions/cache";
-import { promisify } from "node:util";
+import { exec } from "@actions/exec";
 import { join } from "node:path";
-import { execFile as execFileCallback } from "node:child_process";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { archive } from "./common.mjs";
-const execFile = promisify(execFileCallback);
 
 try {
   (async () => {
@@ -27,7 +25,8 @@ try {
 
     await mkdir("trimja-cache", { recursive: true });
     info(`Creating ${archive}`);
-    await execFile("tar", ["-czvf", archive, "-C", builddir, ...files]);
+    await exec("tar", ["-czvf", archive, "-C", builddir, ...files]);
+    await exec("tar", ["-tf", archive]);
 
     const key = `TRIMJA-${HASH}`;
     info(`Saving cache '${key}'`);

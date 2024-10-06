@@ -20018,7 +20018,7 @@ var require_exec = __commonJS({
     exports2.getExecOutput = exports2.exec = void 0;
     var string_decoder_1 = require("string_decoder");
     var tr = __importStar2(require_toolrunner());
-    function exec(commandLine, args, options) {
+    function exec2(commandLine, args, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -20030,7 +20030,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports2.exec = exec;
+    exports2.exec = exec2;
     function getExecOutput(commandLine, args, options) {
       var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
@@ -20053,7 +20053,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec2(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -23246,7 +23246,7 @@ var require_cacheUtils = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isGhes = exports2.assertDefined = exports2.getGnuTarPathOnWindows = exports2.getCacheFileName = exports2.getCompressionMethod = exports2.unlinkFile = exports2.resolvePaths = exports2.getArchiveFileSizeInBytes = exports2.createTempDirectory = void 0;
     var core = __importStar2(require_core());
-    var exec = __importStar2(require_exec());
+    var exec2 = __importStar2(require_exec());
     var glob = __importStar2(require_glob());
     var io = __importStar2(require_io());
     var fs = __importStar2(require("fs"));
@@ -23331,7 +23331,7 @@ var require_cacheUtils = __commonJS({
         additionalArgs.push("--version");
         core.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
         try {
-          yield exec.exec(`${app}`, additionalArgs, {
+          yield exec2.exec(`${app}`, additionalArgs, {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -59915,6 +59915,7 @@ var require_tool_cache = __commonJS({
 // .ninja/main.m.mjs
 var import_cache = __toESM(require_cache2(), 1);
 var import_core = __toESM(require_core(), 1);
+var import_exec = __toESM(require_exec(), 1);
 var import_tool_cache = __toESM(require_tool_cache(), 1);
 var import_node_util = require("util");
 var import_node_path2 = require("path");
@@ -59972,7 +59973,9 @@ try {
       return;
     }
     (0, import_core.info)("Extracting ninja files");
+    await (0, import_exec.exec)("tar", ["-tf", archive]);
     await (0, import_tool_cache.extractTar)(archive, builddir);
+    await (0, import_exec.exec)("ls", ["-R", builddir]);
     const hash = matchedCache.slice("TRIMJA-".length);
     (0, import_core.info)(`Attempting to fetch ${hash}...`);
     try {
@@ -59992,13 +59995,15 @@ try {
     (0, import_core.info)(affectedFiles.map((a) => `  - ${a}`).join("\n"));
     const affectedFilesFile = (0, import_node_path2.join)("trimja-cache", "affected.txt");
     await (0, import_promises.writeFile)(affectedFilesFile, affected.stdout);
-    (0, import_core.info)(`trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write`);
-    await execFile("trimja", [
+    const explain = (0, import_core.getInput)("explain") === "true" ? "--explain" : "";
+    (0, import_core.info)(`trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write ${explain}`);
+    await (0, import_exec.exec)("trimja", [
       "--file",
       ninjaFile,
       "--affected",
       affectedFilesFile,
-      "--write"
+      "--write",
+      explain
     ]);
   })();
 } catch (e) {

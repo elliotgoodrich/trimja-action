@@ -11083,7 +11083,7 @@ var require_mock_interceptor = __commonJS({
 var require_mock_client = __commonJS({
   "node_modules/undici/lib/mock/mock-client.js"(exports2, module2) {
     "use strict";
-    var { promisify: promisify2 } = require("util");
+    var { promisify } = require("util");
     var Client = require_client();
     var { buildMockDispatch } = require_mock_utils();
     var {
@@ -11123,7 +11123,7 @@ var require_mock_client = __commonJS({
         return new MockInterceptor(opts, this[kDispatches]);
       }
       async [kClose]() {
-        await promisify2(this[kOriginalClose])();
+        await promisify(this[kOriginalClose])();
         this[kConnected] = 0;
         this[kMockAgent][Symbols.kClients].delete(this[kOrigin]);
       }
@@ -11136,7 +11136,7 @@ var require_mock_client = __commonJS({
 var require_mock_pool = __commonJS({
   "node_modules/undici/lib/mock/mock-pool.js"(exports2, module2) {
     "use strict";
-    var { promisify: promisify2 } = require("util");
+    var { promisify } = require("util");
     var Pool = require_pool();
     var { buildMockDispatch } = require_mock_utils();
     var {
@@ -11176,7 +11176,7 @@ var require_mock_pool = __commonJS({
         return new MockInterceptor(opts, this[kDispatches]);
       }
       async [kClose]() {
-        await promisify2(this[kOriginalClose])();
+        await promisify(this[kOriginalClose])();
         this[kConnected] = 0;
         this[kMockAgent][Symbols.kClients].delete(this[kOrigin]);
       }
@@ -20018,7 +20018,7 @@ var require_exec = __commonJS({
     exports2.getExecOutput = exports2.exec = void 0;
     var string_decoder_1 = require("string_decoder");
     var tr = __importStar2(require_toolrunner());
-    function exec(commandLine, args, options) {
+    function exec2(commandLine, args, options) {
       return __awaiter2(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -20030,7 +20030,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports2.exec = exec;
+    exports2.exec = exec2;
     function getExecOutput(commandLine, args, options) {
       var _a, _b;
       return __awaiter2(this, void 0, void 0, function* () {
@@ -20053,7 +20053,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec2(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -23246,7 +23246,7 @@ var require_cacheUtils = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isGhes = exports2.assertDefined = exports2.getGnuTarPathOnWindows = exports2.getCacheFileName = exports2.getCompressionMethod = exports2.unlinkFile = exports2.resolvePaths = exports2.getArchiveFileSizeInBytes = exports2.createTempDirectory = void 0;
     var core = __importStar2(require_core());
-    var exec = __importStar2(require_exec());
+    var exec2 = __importStar2(require_exec());
     var glob = __importStar2(require_glob());
     var io = __importStar2(require_io());
     var fs = __importStar2(require("fs"));
@@ -23331,7 +23331,7 @@ var require_cacheUtils = __commonJS({
         additionalArgs.push("--version");
         core.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
         try {
-          yield exec.exec(`${app}`, additionalArgs, {
+          yield exec2.exec(`${app}`, additionalArgs, {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -59120,9 +59120,8 @@ var require_cache2 = __commonJS({
 // .ninja/post.m.mjs
 var import_core = __toESM(require_core(), 1);
 var import_cache = __toESM(require_cache2(), 1);
-var import_node_util = require("util");
+var import_exec = __toESM(require_exec(), 1);
 var import_node_path2 = require("path");
-var import_node_child_process = require("child_process");
 var import_node_fs = require("fs");
 var import_promises = require("fs/promises");
 
@@ -59131,7 +59130,6 @@ var import_node_path = require("path");
 var archive = (0, import_node_path.join)("trimja-cache", "ninjafiles.tar.gz");
 
 // .ninja/post.m.mjs
-var execFile = (0, import_node_util.promisify)(import_node_child_process.execFile);
 try {
   (async () => {
     const builddir = process.env.STATE_builddir;
@@ -59146,7 +59144,8 @@ try {
     const files = [".ninja_log", ".ninja_deps"].filter((f) => (0, import_node_fs.existsSync)((0, import_node_path2.join)(builddir, f)));
     await (0, import_promises.mkdir)("trimja-cache", { recursive: true });
     (0, import_core.info)(`Creating ${archive}`);
-    await execFile("tar", ["-czvf", archive, "-C", builddir, ...files]);
+    await (0, import_exec.exec)("tar", ["-czvf", archive, "-C", builddir, ...files]);
+    await (0, import_exec.exec)("tar", ["-tf", archive]);
     const key = `TRIMJA-${HASH}`;
     (0, import_core.info)(`Saving cache '${key}'`);
     await (0, import_cache.saveCache)([archive], key);

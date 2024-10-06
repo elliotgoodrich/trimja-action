@@ -8,12 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/elliotgoodrich/trimja-action.git"
   },
-  "keywords": [
-    "GitHub",
-    "Action",
-    "ninja",
-    "trimja"
-  ],
+  "keywords": ["GitHub", "Action", "ninja", "trimja"],
   "author": "Elliot Goodrich",
   "license": "MIT",
   "bugs": {
