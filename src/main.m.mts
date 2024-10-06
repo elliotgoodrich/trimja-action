@@ -64,6 +64,7 @@ try {
 
     info("Extracting ninja files");
     await extractTar(archive, builddir);
+    await exec("ls", ["-R"], { cwd: builddir });
 
     const hash = matchedCache.slice("TRIMJA-".length);
 
