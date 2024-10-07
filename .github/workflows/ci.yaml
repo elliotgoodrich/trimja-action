@@ -8,12 +8,12 @@ on:
 
 jobs:
   build:
+    name: Build
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    name: Build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,3 +26,30 @@ jobs:
       - run: ninja -k 0
       - uses: ./
       - run: ninja -k 0 # Run ninja again to make sure there's nothing to do
+
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: only-one-job-should-write-to-release-branch-at-one-time
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: |
+          git fetch origin main:main --depth 1
+          git merge origin/main --msg "Generate files" --log=1 --allow-unrelated-histories --strategy-option theirs
+      - run: npm ci
+      - run: node ninjutsu.mjs
+      - run: ninja -k 0
+      - run: |
+          git add dist --force
+          git commit --amend -C HEAD
+          git push origin
