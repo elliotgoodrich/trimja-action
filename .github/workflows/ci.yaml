@@ -45,7 +45,7 @@ jobs:
       - uses: seanmiddleditch/gha-setup-ninja@master
       - run: |
           git fetch origin main:main --depth 1
-          git merge origin/main --msg "Generate files" --log=1 --allow-unrelated-histories --strategy-option theirs
+          git merge origin/main --message "Generate files" --log=1 --allow-unrelated-histories --strategy-option theirs
       - run: npm ci
       - run: node ninjutsu.mjs
       - run: ninja -k 0
