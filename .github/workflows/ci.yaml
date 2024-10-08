@@ -51,5 +51,7 @@ jobs:
       - run: ninja -k 0
       - run: |
           git add dist --force
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "github-action"
           git commit --amend -C HEAD
           git push origin
