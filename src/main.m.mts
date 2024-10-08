@@ -1,7 +1,7 @@
 import { restoreCache } from "@actions/cache";
 import { addPath, getInput, info, setFailed, warning } from "@actions/core";
 import { exec } from "@actions/exec";
-import { downloadTool, extractTar } from "@actions/tool-cache";
+import { downloadTool, extractTar, extractZip } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
@@ -9,32 +9,53 @@ import { appendFile, writeFile } from "node:fs/promises";
 import { archive } from "./common.mjs";
 const execFile = promisify(execFileCallback);
 
-const version = getInput("version", { required: true });
-const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}/trimja-${version}`;
+function getPlatformVars(version: string): {
+  filename: string;
+  ext: string;
+  extract: (file: string, dest?: string) => Promise<string>;
+} {
+  switch (process.platform) {
+    case "win32":
+      return {
+        filename: `trimja-${version}-win64`,
+        ext: ".zip",
+        extract: extractZip,
+      };
+    case "darwin":
+      return {
+        filename: `trimja-${version}-Darwin`,
+        ext: ".tar.gz",
+        extract: extractTar,
+      };
+    case "linux":
+      return {
+        filename: `trimja-${version}-Linux`,
+        ext: ".tar.gz",
+        extract: extractTar,
+      };
+    default:
+      throw new Error(`Unsupported platform ${process.platform}`);
+  }
+}
 
 try {
   (async () => {
-    if (process.platform === "win32") {
-      throw new Error("Windows not yet supported");
-    }
+    const version = getInput("version", { required: true });
+    const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}`;
 
-    if (process.platform === "darwin") {
-      throw new Error("MacOS not yet supported");
-    }
-
-    const URL = `${URLBase}-Linux.tar.gz`;
+    const { filename, ext, extract } = getPlatformVars(version);
+    const URL = `${URLBase}/${filename}${ext}`;
     info(`Starting Download of ${URL}`);
-    const trimjaTgz = await downloadTool(URL);
-    info("Extracting tar.gz");
-    const trimjaFolder = await extractTar(trimjaTgz, "trimja-install");
+    const trimjaArchive = await downloadTool(URL);
+    info(`Extracting ${trimjaArchive}`);
+    const trimjaFolder = await extract(trimjaArchive, "trimja-install");
     info(`Extracted successfully to ${trimjaFolder}`);
-    const trimjaDir = join(trimjaFolder, `trimja-${version}-Linux`, "bin");
+    const trimjaDir = join(trimjaFolder, filename, "bin");
 
     info(`Adding ${trimjaDir} to the path`);
     addPath(trimjaDir);
 
-    info("$ trimja --version");
-    info((await execFile("trimja", ["--version"])).stdout.trimEnd());
+    await exec("trimja", ["--version"]);
 
     const ninjaFile = getInput("path", { required: true });
     info(`$ trimja --file ${ninjaFile} --builddir`);
@@ -63,10 +84,7 @@ try {
     }
 
     info("Extracting ninja files");
-    await exec("tar", ["-tf", archive]);
     await extractTar(archive, builddir);
-    await exec("ls", ["-R", builddir]);
-
     const hash = matchedCache.slice("TRIMJA-".length);
 
     info(`Attempting to fetch ${hash}...`);

@@ -59145,7 +59145,6 @@ try {
     await (0, import_promises.mkdir)("trimja-cache", { recursive: true });
     (0, import_core.info)(`Creating ${archive}`);
     await (0, import_exec.exec)("tar", ["-czvf", archive, "-C", builddir, ...files]);
-    await (0, import_exec.exec)("tar", ["-tf", archive]);
     const key = `TRIMJA-${HASH}`;
     (0, import_core.info)(`Saving cache '${key}'`);
     await (0, import_cache.saveCache)([archive], key);

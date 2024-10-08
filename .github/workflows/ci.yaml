@@ -9,7 +9,11 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,6 +25,41 @@ jobs:
       - run: node ninjutsu.mjs
       - run: ninja -k 0
       - uses: ./
-        with:
-          version: '0.2.0'
       - run: ninja -k 0 # Run ninja again to make sure there's nothing to do
+
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: only-one-job-should-write-to-release-branch-at-one-time
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: |
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "github-action"
+          git fetch origin main:main --depth 1
+          git merge origin/main --message "Generate files" --log=1 --allow-unrelated-histories --strategy-option theirs
+      - run: npm ci
+      - run: node ninjutsu.mjs
+      - run: ninja -k 0
+      - run: |
+          git add dist --force
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "github-action"
+          git commit --amend -C HEAD
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin
