@@ -4,7 +4,7 @@ import { exec } from "@actions/exec";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
-import { archive } from "./common.mjs";
+import { archive, cachePrefix } from "./common.mjs";
 
 try {
   (async () => {
@@ -27,7 +27,7 @@ try {
     info(`Creating ${archive}`);
     await exec("tar", ["-czvf", archive, "-C", builddir, ...files]);
 
-    const key = `TRIMJA-${HASH}`;
+    const key = `${cachePrefix}${HASH}`;
     info(`Saving cache '${key}'`);
     await saveCache([archive], key);
   })();
