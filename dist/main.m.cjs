@@ -59925,6 +59925,7 @@ var import_promises = require("fs/promises");
 // .ninja/common.mjs
 var import_node_path = require("path");
 var archive = (0, import_node_path.join)("trimja-cache", "ninjafiles.tar.gz");
+var cachePrefix = `TRIMJA-${process.platform}-`;
 
 // .ninja/main.m.mjs
 var execFile = (0, import_node_util.promisify)(import_node_child_process.execFile);
@@ -59985,14 +59986,16 @@ try {
       encoding: "utf8"
     });
     (0, import_core.info)("Getting affected files");
-    const matchedCache = await (0, import_cache.restoreCache)([archive], "TRIMJA-", ["TRIMJA-"]);
+    const matchedCache = await (0, import_cache.restoreCache)([archive], cachePrefix, [
+      cachePrefix
+    ]);
     if (matchedCache === void 0) {
       (0, import_core.info)("No cache found, skipping trimja");
       return;
     }
     (0, import_core.info)("Extracting ninja files");
     await (0, import_tool_cache.extractTar)(archive, builddir);
-    const hash = matchedCache.slice("TRIMJA-".length);
+    const hash = matchedCache.slice(cachePrefix.length);
     (0, import_core.info)(`Attempting to fetch ${hash}...`);
     try {
       await execFile("git", ["fetch", "origin", hash, "--depth=1"]);

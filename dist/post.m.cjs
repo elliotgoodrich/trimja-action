@@ -59128,6 +59128,7 @@ var import_promises = require("fs/promises");
 // .ninja/common.mjs
 var import_node_path = require("path");
 var archive = (0, import_node_path.join)("trimja-cache", "ninjafiles.tar.gz");
+var cachePrefix = `TRIMJA-${process.platform}-`;
 
 // .ninja/post.m.mjs
 try {
@@ -59145,7 +59146,7 @@ try {
     await (0, import_promises.mkdir)("trimja-cache", { recursive: true });
     (0, import_core.info)(`Creating ${archive}`);
     await (0, import_exec.exec)("tar", ["-czvf", archive, "-C", builddir, ...files]);
-    const key = `TRIMJA-${HASH}`;
+    const key = `${cachePrefix}${HASH}`;
     (0, import_core.info)(`Saving cache '${key}'`);
     await (0, import_cache.saveCache)([archive], key);
   })();

@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
 import { appendFile, writeFile } from "node:fs/promises";
-import { archive } from "./common.mjs";
+import { archive, cachePrefix } from "./common.mjs";
 const execFile = promisify(execFileCallback);
 
 function getPlatformVars(version: string): {
@@ -77,7 +77,9 @@ try {
     });
 
     info("Getting affected files");
-    const matchedCache = await restoreCache([archive], "TRIMJA-", ["TRIMJA-"]);
+    const matchedCache = await restoreCache([archive], cachePrefix, [
+      cachePrefix,
+    ]);
     if (matchedCache === undefined) {
       info("No cache found, skipping trimja");
       return;
@@ -85,7 +87,7 @@ try {
 
     info("Extracting ninja files");
     await extractTar(archive, builddir);
-    const hash = matchedCache.slice("TRIMJA-".length);
+    const hash = matchedCache.slice(cachePrefix.length);
 
     info(`Attempting to fetch ${hash}...`);
     try {
