@@ -25,6 +25,12 @@ jobs:
       - run: node ninjutsu.mjs
       - run: ninja -k 0
       - uses: ./
+        with:
+          explain: true
+          affected: |
+            js
+            test
+          build-configuration: "js"
       - run: ninja -k 0 # Run ninja again to make sure there's nothing to do
 
   publish:

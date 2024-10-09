@@ -8,6 +8,12 @@ inputs:
   path:
     description: 'Path to the ninja build file'
     default: './build.ninja'
+  build-configuration:
+    description: 'Additional string to include in the cache that describes your build configuration'
+    default: ''
+  affected:
+    description: 'List of additional files or build outputs to mark as affected'
+    default: ''
   explain:
     description: 'Whether to pass --explain to trimja'
     default: 'false'
