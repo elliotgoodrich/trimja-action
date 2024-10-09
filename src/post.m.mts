@@ -4,13 +4,18 @@ import { exec } from "@actions/exec";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
-import { archive, cachePrefix } from "./common.mjs";
+import { archive } from "./common.mjs";
 
 try {
   (async () => {
     const builddir = process.env.STATE_builddir;
     if (builddir === undefined) {
       throw new Error("Unable to find builddir");
+    }
+
+    const cachePrefix = process.env.STATE_cachePrefix;
+    if (cachePrefix === undefined) {
+      throw new Error("Unable to find cachePrefix");
     }
     info(`Found ninja output directory: ${builddir}`);
 

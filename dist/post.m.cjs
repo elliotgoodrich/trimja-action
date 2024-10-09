@@ -59128,7 +59128,6 @@ var import_promises = require("fs/promises");
 // .ninja/common.mjs
 var import_node_path = require("path");
 var archive = (0, import_node_path.join)("trimja-cache", "ninjafiles.tar.gz");
-var cachePrefix = `TRIMJA-${process.platform}-`;
 
 // .ninja/post.m.mjs
 try {
@@ -59136,6 +59135,10 @@ try {
     const builddir = process.env.STATE_builddir;
     if (builddir === void 0) {
       throw new Error("Unable to find builddir");
+    }
+    const cachePrefix = process.env.STATE_cachePrefix;
+    if (cachePrefix === void 0) {
+      throw new Error("Unable to find cachePrefix");
     }
     (0, import_core.info)(`Found ninja output directory: ${builddir}`);
     const HASH = process.env.GITHUB_SHA;

@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
 import { appendFile, writeFile } from "node:fs/promises";
-import { archive, cachePrefix } from "./common.mjs";
+import { archive } from "./common.mjs";
 const execFile = promisify(execFileCallback);
 
 function getPlatformVars(version: string): {
@@ -40,6 +40,13 @@ function getPlatformVars(version: string): {
 
 try {
   (async () => {
+    const buildConfig = getInput("build-configuration", { required: true });
+    if (buildConfig.length > 100) {
+      throw new Error(
+        `build-configuration is ${buildConfig.length} and it cannot be longer than 100 characters`,
+      );
+    }
+
     const version = getInput("version", { required: true });
     const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}`;
 
@@ -72,9 +79,15 @@ try {
     }
 
     info("Writing to GITHUB_STATE file");
-    await appendFile(variablesForPostFile, `builddir=${builddir}`, {
-      encoding: "utf8",
-    });
+
+    const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
+    await appendFile(
+      variablesForPostFile,
+      `builddir=${builddir}\ncachePrefix=${cachePrefix}`,
+      {
+        encoding: "utf8",
+      },
+    );
 
     info("Getting affected files");
     const matchedCache = await restoreCache([archive], cachePrefix, [
@@ -105,11 +118,15 @@ try {
     ]);
 
     const affectedFiles = affected.stdout.trimEnd().split("\n");
-    info("The following files are affected:");
+    info(`The following files have been changed between ${hash}..HEAD:`);
     info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
 
+    const extraAffectedFiles = getInput("affected", { required: true });
     const affectedFilesFile = join("trimja-cache", "affected.txt");
-    await writeFile(affectedFilesFile, affected.stdout);
+    await writeFile(
+      affectedFilesFile,
+      `${affected.stdout}\n${extraAffectedFiles}`,
+    );
 
     const explain = getInput("explain") === "true" ? "--explain" : "";
     info(
