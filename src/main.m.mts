@@ -40,14 +40,14 @@ function getPlatformVars(version: string): {
 
 try {
   (async () => {
-    const buildConfig = getInput("build-configuration", { required: true });
+    const buildConfig = getInput("build-configuration");
     if (buildConfig.length > 100) {
       throw new Error(
         `build-configuration is ${buildConfig.length} and it cannot be longer than 100 characters`,
       );
     }
 
-    const version = getInput("version", { required: true });
+    const version = getInput("version");
     const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version}`;
 
     const { filename, ext, extract } = getPlatformVars(version);
@@ -64,7 +64,7 @@ try {
 
     await exec("trimja", ["--version"]);
 
-    const ninjaFile = getInput("path", { required: true });
+    const ninjaFile = getInput("path");
     info(`$ trimja --file ${ninjaFile} --builddir`);
     const builddirOutput = await execFile("trimja", [
       "--file",
@@ -121,7 +121,7 @@ try {
     info(`The following files have been changed between ${hash}..HEAD:`);
     info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
 
-    const extraAffectedFiles = getInput("affected", { required: true });
+    const extraAffectedFiles = getInput("affected");
     const affectedFilesFile = join("trimja-cache", "affected.txt");
     await writeFile(
       affectedFilesFile,
