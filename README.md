@@ -15,7 +15,7 @@ To use the Trimja GitHub Action in your workflow, add the following step to your
 YAML configuration:
 
 ```yaml
-- uses: elliotgoodrich/trimja-action@release # live-at-head release
+- uses: elliotgoodrich/trimja-action@v1
   with:
     # Version string for trimja.
     # Default: '0.4.0'
@@ -64,7 +64,7 @@ jobs:
           -G Ninja
 
     # Step 4: Setup and run trimja
-    - uses: elliotgoodrich/trimja-action@release # live-at-head release
+    - uses: elliotgoodrich/trimja-action@v1
       with:
         path: output/build.ninja
         build-configuration: Debug-clang
