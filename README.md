@@ -18,7 +18,7 @@ YAML configuration:
 - uses: elliotgoodrich/trimja-action@v1
   with:
     # Version string for trimja.
-    # Default: '0.4.0'
+    # Default: '0.5.1'
     version: ''
 
     # The path to the ninja build file.
