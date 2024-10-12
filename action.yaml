@@ -4,7 +4,7 @@ author: 'Elliot Goodrich'
 inputs:
   version:
     description: 'Version of trimja to install'
-    default: '0.5.1'
+    default: '0.5.2'
   path:
     description: 'Path to the ninja build file'
     default: './build.ninja'
