@@ -3,9 +3,9 @@
 # Trimja Github Action
 
 The Trimja GitHub Action will download and run
-[trimja](https://github.com/elliotgoodrich/trimja) to cut the work needed to do
-in a [Ninja](https://ninja-build.org/)-based project to only on only the
-dependent build commands affected by files changed in the the latest commit.
+[trimja](https://github.com/elliotgoodrich/trimja), cutting down the work in a
+[Ninja](https://ninja-build.org/)-based project to only the commands affected by
+the files changed in the latest commit.
 
 This can **greatly speed up the time taken for your pull requests to pass CI**.
 
