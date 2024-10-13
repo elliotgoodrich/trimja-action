@@ -75,10 +75,7 @@ jobs:
     # Step 5: Build only those things affected by the latest commits
     - run: cmake --build output --config Debug
 
-    # Step 6: Run any affected tests with CTest
-    - run: ctest --build-config Debug --output-on-failure --test-dir output
-
-    # Step 7: Run legacy tests that haven't been migrated to CTest
+    # Step 6: Run legacy tests that aren't yet in Ninja
     - run: ./output/extra-tests --run-all-tests
 ```
 
