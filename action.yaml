@@ -18,7 +18,7 @@ inputs:
     description: 'Whether to pass --explain to trimja'
     default: 'false'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/main.m.cjs'
   post: 'dist/post.m.cjs'
   post-if: success()

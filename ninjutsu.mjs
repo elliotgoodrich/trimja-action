@@ -1,10 +1,9 @@
-import { NinjaBuilder, getInput } from "@ninjutsu-build/core";
+import { NinjaBuilder, getInput, implicitDeps } from "@ninjutsu-build/core";
 import { makeTSCRule } from "@ninjutsu-build/tsc";
 import { makeFormatRule, makeLintRule } from "@ninjutsu-build/biome";
 import { makeESBuildRule } from "@ninjutsu-build/esbuild";
-import { writeFileSync } from "node:fs";
+import { globSync, writeFileSync } from "node:fs";
 import { join, parse } from "node:path/posix";
-import { globSync } from "glob";
 
 const biomeConfig = "biome.json";
 
@@ -68,7 +67,9 @@ generatedJS
       buildOptions: {
         bundle: true,
         platform: "node",
-        target: "es2022",
+        target: "node24",
+        "inject:shims/import-meta-url.js": true,
+        "define:import.meta.url": "__importMetaUrl",
       },
     }),
   );
