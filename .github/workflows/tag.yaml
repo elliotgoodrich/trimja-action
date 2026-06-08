@@ -1,0 +1,25 @@
+name: Tag
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  tag:
+    name: Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          MAJOR="${TAG%%.*}"
+          if [[ ! "$MAJOR" =~ ^v[0-9]+$ ]]; then
+            echo "Error: expected major version like 'v1', got '$MAJOR' (from tag '$TAG')"
+            exit 1
+          fi
+          git tag "$MAJOR" "${{ github.sha }}" --force
+          git push origin "refs/tags/$MAJOR" --force

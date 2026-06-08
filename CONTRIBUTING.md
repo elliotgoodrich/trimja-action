@@ -21,13 +21,13 @@ should not be committed along with the changes.  Once a change has landed on
 
 ## Creating a Release
 
-  1. Create a release from the GitHub website
-     * Select a new tag in the format of `vA.B.C`
-     * Select the `release` branch as the target
-     * Click "Generate release notes"
-     * Keep the generated release name as `vA.B.C`
-     * Click "Publish release"
-  2. `git fetch origin`
-  3. `git tag vA vA.B.C --force`
-  4. `git push origin tag vA --force`
+Create a release from the GitHub website:
+
+  * Select a new tag in the format of `vA.B.C`
+  * Select the `release` branch as the target
+  * Click "Generate release notes"
+  * Keep the generated release name as `vA.B.C`
+  * Click "Publish release"
+
+The CI will automatically tag the same commit as `vA`.
 `
