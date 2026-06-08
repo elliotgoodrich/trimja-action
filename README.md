@@ -52,10 +52,7 @@ jobs:
     # Step 1: Checkout the repository
     - uses: actions/checkout@v4
 
-    # Step 2: Setup ninja
-    - uses: seanmiddleditch/gha-setup-ninja@v5
-
-    # Step 3: Configure the project using CMake
+    # Step 2: Configure the project using CMake
     - run: >
         cmake -B output
           -DCMAKE_CXX_COMPILER=clang
@@ -63,7 +60,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Debug
           -G Ninja
 
-    # Step 4: Setup and run trimja
+    # Step 3: Setup and run trimja
     - uses: elliotgoodrich/trimja-action@v1
       with:
         path: output/build.ninja
@@ -72,10 +69,10 @@ jobs:
           output/extra-tests
         explain: true
 
-    # Step 5: Build only those things affected by the latest commits
+    # Step 4: Build only those things affected by the latest commits
     - run: cmake --build output --config Debug
 
-    # Step 6: Run legacy tests that aren't yet in Ninja
+    # Step 5: Run legacy tests that aren't yet in Ninja
     - run: ./output/extra-tests --run-all-tests
 ```
 

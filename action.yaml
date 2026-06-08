@@ -17,6 +17,9 @@ inputs:
   explain:
     description: 'Whether to pass --explain to trimja'
     default: 'false'
+branding:
+  icon: 'fast-forward'
+  color: 'blue'
 runs:
   using: 'node24'
   main: 'dist/main.m.cjs'
