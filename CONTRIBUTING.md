@@ -3,13 +3,14 @@
 ## Requirements
 
 The following are prerequsite to building trimja-action:
-  * [NodeJS](https://nodejs.org/en/download) (version 20+)
+  * [NodeJS](https://nodejs.org/en/download) (version 24+)
   * [ninja](https://ninja-build.org/)
 
 ## Building
 
   1. `npm ci`
-  2. `ninja`
+  2. `node ninjutsu.mjs`
+  3. `ninja`
 
 ## Submitting changes
 
