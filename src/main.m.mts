@@ -1,3 +1,4 @@
+import { DefaultArtifactClient } from "@actions/artifact";
 import { restoreCache } from "@actions/cache";
 import {
   addPath,
@@ -13,9 +14,44 @@ import { downloadTool, extractTar, extractZip } from "@actions/tool-cache";
 import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
+import { existsSync } from "node:fs";
 import { appendFile, writeFile } from "node:fs/promises";
 import { archive } from "./common.mjs";
 const execFile = promisify(execFileCallback);
+
+// Upload the ninja file, the affected files list, and the ninja log/deps
+// files  as a workflow artifact so that a crash/failure can be reproduced later.
+async function uploadCrashReport(
+  ninjaFile: string,
+  affectedFilesFile: string,
+  builddir: string,
+): Promise<void> {
+  try {
+    const candidates = [
+      ninjaFile,
+      affectedFilesFile,
+      join(builddir, ".ninja_log"),
+      join(builddir, ".ninja_deps"),
+    ];
+    const files = candidates.filter((f) => existsSync(f));
+
+    if (files.length === 0) {
+      warning("No files found to include in the crash report");
+      return;
+    }
+
+    const runId = process.env.GITHUB_RUN_ID ?? "local";
+    const runAttempt = process.env.GITHUB_RUN_ATTEMPT ?? "1";
+    const artifactName = `trimja-failure-${runId}-${runAttempt}`;
+    info(`Uploading crash report as artifact '${artifactName}'`);
+    const artifactClient = new DefaultArtifactClient();
+    await artifactClient.uploadArtifact(artifactName, files, process.cwd(), {
+      retentionDays: 7,
+    });
+  } catch (e) {
+    warning(`Failed to upload crash report: ${e}`);
+  }
+}
 
 function getPlatformVars(version: string): {
   filename: string;
@@ -181,6 +217,7 @@ try {
           `SIGKILL usually means the runner ran out of memory (OOM killer). Check the ${ninjaFile} size or use a larger runner.`,
         );
       }
+      await uploadCrashReport(ninjaFile, affectedFilesFile, builddir);
       throw e;
     }
   })();
