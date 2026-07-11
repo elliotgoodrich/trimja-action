@@ -67771,6 +67771,7 @@ function getPlatformVars(version3) {
 }
 try {
   (async () => {
+    var _a;
     const buildConfig = getInput("build-configuration");
     if (buildConfig.length > 100) {
       throw new Error(`build-configuration is ${buildConfig.length} and it cannot be longer than 100 characters`);
@@ -67779,35 +67780,35 @@ try {
     const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version3}`;
     const { filename, ext, extract } = getPlatformVars(version3);
     const URL3 = `${URLBase}/${filename}${ext}`;
-    info(`Starting Download of ${URL3}`);
+    debug(`Starting Download of ${URL3}`);
     const trimjaArchive = await downloadTool(URL3);
-    info(`Extracting ${trimjaArchive}`);
+    debug(`Extracting ${trimjaArchive}`);
     const trimjaFolder = await extract(trimjaArchive, "trimja-install");
-    info(`Extracted successfully to ${trimjaFolder}`);
+    debug(`Extracted successfully to ${trimjaFolder}`);
     const trimjaDir = (0, import_node_path3.join)(trimjaFolder, filename, "bin");
-    info(`Adding ${trimjaDir} to the path`);
+    debug(`Adding ${trimjaDir} to the path`);
     addPath(trimjaDir);
     await exec("trimja", ["--version"]);
     const ninjaFile = getInput("path");
-    info(`$ trimja --file ${ninjaFile} --builddir`);
+    debug(`$ trimja --file ${ninjaFile} --builddir`);
     const builddirOutput = await execFile("trimja", [
       "--file",
       ninjaFile,
       "--builddir"
     ]);
     const builddir = builddirOutput.stdout.trim();
-    info(builddir);
+    debug(`builddir: ${builddir}`);
     const variablesForPostFile = process.env.GITHUB_STATE;
     if (variablesForPostFile === void 0) {
       throw new Error("'GITHUB_STATE' environment variable not set");
     }
-    info("Writing to GITHUB_STATE file");
+    debug("Writing to GITHUB_STATE file");
     const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
     await (0, import_promises.appendFile)(variablesForPostFile, `builddir=${builddir}
 cachePrefix=${cachePrefix}`, {
       encoding: "utf8"
     });
-    info("Getting affected files");
+    debug("Getting affected files");
     const matchedCache = await restoreCache([archive], cachePrefix, [
       cachePrefix
     ]);
@@ -67815,13 +67816,16 @@ cachePrefix=${cachePrefix}`, {
       info("No cache found, skipping trimja");
       return;
     }
-    info("Extracting ninja files");
+    debug("Extracting ninja files");
     await extractTar2(archive, builddir);
+    const extracted = await execFile("tar", ["-tzvf", archive]);
+    debug(`Extracted the following files to ${builddir}:
+${extracted.stdout}`);
     const hash = matchedCache.slice(cachePrefix.length);
-    info(`Attempting to fetch ${hash}...`);
+    debug(`Attempting to fetch ${hash}...`);
     try {
       await execFile("git", ["fetch", "origin", hash, "--depth=1"]);
-      info(`...Successfully fetched ${hash}`);
+      debug(`...Successfully fetched ${hash}`);
     } catch (e) {
       warning(`...Failed to fetch ${hash}, skipping trimja`);
       return;
@@ -67838,16 +67842,41 @@ cachePrefix=${cachePrefix}`, {
     const affectedFilesFile = (0, import_node_path3.join)("trimja-cache", "affected.txt");
     await (0, import_promises.writeFile)(affectedFilesFile, `${affected.stdout}
 ${extraAffectedFiles}`);
-    const explain = getInput("explain") === "true" ? "--explain" : "";
-    info(`trimja --file ${ninjaFile} --affected ${affectedFilesFile} --write ${explain}`);
-    await exec("trimja", [
+    const args = [
       "--file",
       ninjaFile,
       "--affected",
       affectedFilesFile,
-      "--write",
-      explain
-    ]);
+      "--write"
+    ];
+    if (getInput("explain") === "true") {
+      args.push("--explain");
+    }
+    debug(`$ trimja ${args.join(" ")}`);
+    try {
+      const { stdout, stderr } = await execFile("trimja", args, {
+        maxBuffer: 64 * 1024 * 1024
+      });
+      info(stdout);
+      if (stderr) {
+        info(stderr);
+      }
+    } catch (e) {
+      const err = e;
+      error(`trimja failed \u2014 exit code ${(_a = err.code) !== null && _a !== void 0 ? _a : "null"}${err.signal ? `, killed by signal ${err.signal}` : ""}`);
+      if (err.stdout) {
+        info(`stdout:
+${err.stdout}`);
+      }
+      if (err.stderr) {
+        error(`stderr:
+${err.stderr}`);
+      }
+      if (err.signal === "SIGKILL") {
+        warning(`SIGKILL usually means the runner ran out of memory (OOM killer). Check the ${ninjaFile} size or use a larger runner.`);
+      }
+      throw e;
+    }
   })();
 } catch (e) {
   setFailed(e);
