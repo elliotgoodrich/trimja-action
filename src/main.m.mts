@@ -167,11 +167,14 @@ try {
     info(`The following files have been changed between ${hash}..HEAD:`);
     info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
 
-    const extraAffectedFiles = getInput("affected");
+    const extraAffectedFiles = getInput("affected")
+      .split(/\r?\n/)
+      .map((f) => f.trim())
+      .filter((f) => f.length > 0);
     const affectedFilesFile = join("trimja-cache", "affected.txt");
     await writeFile(
       affectedFilesFile,
-      `${affected.stdout}\n${extraAffectedFiles}`,
+      `${affected.stdout}\n${extraAffectedFiles.join("\n")}`,
     );
 
     const args = [
@@ -181,6 +184,16 @@ try {
       affectedFilesFile,
       "--write",
     ];
+    const targets = getInput("targets")
+      .split(/\r?\n/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+    for (const target of targets) {
+      args.push("--target", target);
+    }
+    if (getInput("target-default") === "true") {
+      args.push("--target-default");
+    }
     if (getInput("explain") === "true") {
       args.push("--explain");
     }

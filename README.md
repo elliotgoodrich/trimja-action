@@ -15,10 +15,10 @@ To use the Trimja GitHub Action in your workflow, add the following step to your
 YAML configuration:
 
 ```yaml
-- uses: elliotgoodrich/trimja-action@v1
+- uses: elliotgoodrich/trimja-action@v2
   with:
     # Version string for trimja.
-    # Default: '1.1.0'
+    # Default: '1.3.0'
     version: ''
 
     # The path to the ninja build file.
@@ -31,7 +31,24 @@ YAML configuration:
     # Default: ''
     build-configuration: ''
 
-    # A list of additional files or build outputs to mark as affected.
+    # Newline-separated list of ninja build targets to restrict to.  If you call
+    # `ninja A B ... Z` in your CI, you need to list all [A, B, ... Z] in
+    # `targets`.  If you only ever call `ninja` without providing any targets,
+    # this property can be omitted.
+    # Default: ''
+    targets: ''
+
+    # Include the default build target in the list of targets to restrict to.
+    # If you call both `ninja A B C` and `ninja` in your CI, then A, B, and C
+    # must be passed to `targets` and `target-default` set to 'true'.  This
+    # property can be ignored if you never call `ninja` without a target or if
+    # you don't provide an option to the `targets` property.
+    # Default: 'false'
+    target-default: 'false'
+
+    # A newline-separated list of additional files or build outputs to mark as
+    # affected.  This can be useful if the ninja manifest file does not correctly
+    # list all dependencies.
     # Default: ''
     affected: ''
 
@@ -50,7 +67,7 @@ jobs:
   build:
     steps:
     # Step 1: Checkout the repository
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     # Step 2: Configure the project using CMake
     - run: >
@@ -61,19 +78,21 @@ jobs:
           -G Ninja
 
     # Step 3: Setup and run trimja
-    - uses: elliotgoodrich/trimja-action@v1
+    - uses: elliotgoodrich/trimja-action@v2
       with:
         path: output/build.ninja
         build-configuration: Debug-clang
-        affected: |
-          output/extra-tests
-        explain: true
+        targets: |
+          run_tests
+          package
+        target-default: true
+        explain: false
 
     # Step 4: Build only those things affected by the latest commits
     - run: cmake --build output --config Debug
 
-    # Step 5: Run legacy tests that aren't yet in Ninja
-    - run: ./output/extra-tests --run-all-tests
+    # Step 5: Run additional tests and package
+    - run: cmake --build output --config Debug --target run_tests package
 ```
 
 ## FAQ
@@ -112,7 +131,9 @@ However, there are a few situations where more commands may be included:
   3. The `build-configuration` was not supplied or is not unique across different
      build configurations. In this case, the wrong cache is being used, and
      `trimja` includes the build commands.
-  4. There may be a bug. If you suspect an issue, please open an issue on the
+  4. You are calling ninja with a target but do not specify those with `targets`
+     and `target-default`.
+  5. There may be a bug. If you suspect an issue, please open an issue on the
      [trimja-action repository](https://github.com/elliotgoodrich/trimja-action/issues/new).
 
 ### Why does `trimja-action` include fewer commands than expected?

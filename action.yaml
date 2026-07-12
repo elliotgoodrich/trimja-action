@@ -4,7 +4,7 @@ author: 'Elliot Goodrich'
 inputs:
   version:
     description: 'Version of trimja to install'
-    default: '1.1.0'
+    default: '1.3.0'
   path:
     description: 'Path to the ninja build file'
     default: './build.ninja'
@@ -12,8 +12,14 @@ inputs:
     description: 'Additional string to include in the cache that describes your build configuration'
     default: ''
   affected:
-    description: 'List of additional files or build outputs to mark as affected'
+    description: 'Newline-separated list of additional files or build outputs to mark as affected'
     default: ''
+  targets:
+    description: 'Newline-separated list of ninja build targets to restrict to'
+    default: ''
+  target-default:
+    description: 'Include the default build target in the list of targets to restrict to'
+    default: 'false'
   explain:
     description: 'Whether to pass --explain to trimja'
     default: 'false'
