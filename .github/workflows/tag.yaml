@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
   tag:
     name: Tag
@@ -14,12 +17,13 @@ jobs:
       - uses: actions/checkout@v6
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+          SHA: ${{ github.sha }}
         run: |
-          TAG="${{ github.event.release.tag_name }}"
           MAJOR="${TAG%%.*}"
           if [[ ! "$MAJOR" =~ ^v[0-9]+$ ]]; then
             echo "Error: expected major version like 'v1', got '$MAJOR' (from tag '$TAG')"
             exit 1
           fi
-          git tag "$MAJOR" "${{ github.sha }}" --force
+          git tag "$MAJOR" "$SHA" --force
           git push origin "refs/tags/$MAJOR" --force
