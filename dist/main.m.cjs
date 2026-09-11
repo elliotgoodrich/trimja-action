@@ -4054,11 +4054,11 @@ var require_util2 = __commonJS({
     var { isUint8Array } = require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto6;
+    var crypto7;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto6.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
+      supportedHashes = crypto7.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
     } catch {
     }
     function responseURL(response) {
@@ -4320,7 +4320,7 @@ var require_util2 = __commonJS({
       }
     }
     function bytesMatch(bytes, metadataList) {
-      if (crypto6 === void 0) {
+      if (crypto7 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -4335,7 +4335,7 @@ var require_util2 = __commonJS({
       for (const item of metadata2) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto6.createHash(algorithm).update(bytes).digest("base64");
+        let actualValue = crypto7.createHash(algorithm).update(bytes).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -5406,8 +5406,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto6 = require("node:crypto");
-      random = (max) => crypto6.randomInt(0, max);
+      const crypto7 = require("node:crypto");
+      random = (max) => crypto7.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -17053,13 +17053,13 @@ var require_frame = __commonJS({
     init_import_meta_url();
     var { maxUnsigned16Bit } = require_constants5();
     var BUFFER_SIZE = 16386;
-    var crypto6;
+    var crypto7;
     var buffer3 = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
     } catch {
-      crypto6 = {
+      crypto7 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer4, _offset, _size) {
           for (let i = 0; i < buffer4.length; ++i) {
@@ -17072,7 +17072,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto6.randomFillSync(buffer3 ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto7.randomFillSync(buffer3 ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer3[bufIdx++], buffer3[bufIdx++], buffer3[bufIdx++], buffer3[bufIdx++]];
     }
@@ -17145,9 +17145,9 @@ var require_connection = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers();
     var { getDecodeSplit } = require_util2();
     var { WebsocketFrameSend } = require_frame();
-    var crypto6;
+    var crypto7;
     try {
-      crypto6 = require("node:crypto");
+      crypto7 = require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url2, protocols, client2, ws, onEstablish, options) {
@@ -17167,7 +17167,7 @@ var require_connection = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request2.headersList = headersList;
       }
-      const keyValue = crypto6.randomBytes(16).toString("base64");
+      const keyValue = crypto7.randomBytes(16).toString("base64");
       request2.headersList.append("sec-websocket-key", keyValue);
       request2.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -17197,7 +17197,7 @@ var require_connection = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto6.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto7.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -28281,8 +28281,8 @@ var require_graceful_fs = __commonJS({
       }
       var fs$appendFile = fs12.appendFile;
       if (fs$appendFile)
-        fs12.appendFile = appendFile3;
-      function appendFile3(path12, data, options, cb) {
+        fs12.appendFile = appendFile2;
+      function appendFile2(path12, data, options, cb) {
         if (typeof options === "function")
           cb = options, options = null;
         return go$appendFile(path12, data, options, cb);
@@ -76339,6 +76339,7 @@ function escapeProperty(s) {
 
 // node_modules/@actions/core/lib/file-command.js
 init_import_meta_url();
+var crypto2 = __toESM(require("crypto"), 1);
 var fs = __toESM(require("fs"), 1);
 var os2 = __toESM(require("os"), 1);
 function issueFileCommand(command, message) {
@@ -76352,6 +76353,17 @@ function issueFileCommand(command, message) {
   fs.appendFileSync(filePath, `${toCommandValue(message)}${os2.EOL}`, {
     encoding: "utf8"
   });
+}
+function prepareKeyValueMessage(key, value) {
+  const delimiter4 = `ghadelimiter_${crypto2.randomUUID()}`;
+  const convertedValue = toCommandValue(value);
+  if (key.includes(delimiter4)) {
+    throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter4}"`);
+  }
+  if (convertedValue.includes(delimiter4)) {
+    throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter4}"`);
+  }
+  return `${key}<<${delimiter4}${os2.EOL}${convertedValue}${os2.EOL}${delimiter4}`;
 }
 
 // node_modules/@actions/core/lib/core.js
@@ -78212,6 +78224,13 @@ function warning(message, properties = {}) {
 }
 function info(message) {
   process.stdout.write(message + os5.EOL);
+}
+function saveState(name, value) {
+  const filePath = process.env["GITHUB_STATE"] || "";
+  if (filePath) {
+    return issueFileCommand("STATE", prepareKeyValueMessage(name, value));
+  }
+  issueCommand("save-state", { name }, toCommandValue(value));
 }
 
 // node_modules/@actions/artifact/lib/internal/shared/config.js
@@ -80786,7 +80805,7 @@ init_import_meta_url();
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/util/uuidUtils.js
 init_import_meta_url();
-function randomUUID() {
+function randomUUID2() {
   return crypto.randomUUID();
 }
 
@@ -80826,7 +80845,7 @@ var PipelineRequestImpl = class {
     this.abortSignal = options.abortSignal;
     this.onUploadProgress = options.onUploadProgress;
     this.onDownloadProgress = options.onDownloadProgress;
-    this.requestId = options.requestId || randomUUID();
+    this.requestId = options.requestId || randomUUID2();
     this.allowInsecureConnection = options.allowInsecureConnection ?? false;
     this.enableBrowserStreams = options.enableBrowserStreams ?? false;
     this.requestOverrides = options.requestOverrides;
@@ -82268,7 +82287,7 @@ async function concat(sources) {
 
 // node_modules/@typespec/ts-http-runtime/dist/esm/policies/multipartPolicy.js
 function generateBoundary() {
-  return `----AzSDKFormBoundary${randomUUID()}`;
+  return `----AzSDKFormBoundary${randomUUID2()}`;
 }
 function encodeHeaders(headers) {
   let result = "";
@@ -82688,8 +82707,8 @@ init_import_meta_url();
 function isError2(e) {
   return isError(e);
 }
-function randomUUID2() {
-  return randomUUID();
+function randomUUID3() {
+  return randomUUID2();
 }
 var isNodeLike2 = isNodeLike;
 function uint8ArrayToString2(bytes, format) {
@@ -111090,7 +111109,7 @@ var BlobLeaseClient = class {
       this._containerOrBlobOperation = clientContext.blob;
     }
     if (!leaseId2) {
-      leaseId2 = randomUUID2();
+      leaseId2 = randomUUID3();
     }
     this._leaseId = leaseId2;
   }
@@ -115355,7 +115374,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
         throw new RangeError(`The buffer's size is too big or the BlockSize is too small;the number of blocks must be <= ${BLOCK_BLOB_MAX_BLOCKS}`);
       }
       const blockList = [];
-      const blockIDPrefix = randomUUID2();
+      const blockIDPrefix = randomUUID3();
       let transferProgress = 0;
       const batch = new Batch(options.concurrency);
       for (let i = 0; i < numBlocks; i++) {
@@ -115437,7 +115456,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
     }
     return tracingClient.withSpan("BlockBlobClient-uploadStream", options, async (updatedOptions) => {
       let blockNum = 0;
-      const blockIDPrefix = randomUUID2();
+      const blockIDPrefix = randomUUID3();
       let transferProgress = 0;
       const blockList = [];
       const scheduler = new BufferScheduler(
@@ -116252,7 +116271,7 @@ var KnownEncryptionAlgorithmType2;
 })(KnownEncryptionAlgorithmType2 || (KnownEncryptionAlgorithmType2 = {}));
 
 // node_modules/@actions/artifact/lib/internal/upload/blob-upload.js
-var crypto2 = __toESM(require("crypto"), 1);
+var crypto3 = __toESM(require("crypto"), 1);
 var stream = __toESM(require("stream"), 1);
 var __awaiter9 = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -116316,7 +116335,7 @@ function uploadToBlobStorage(authenticatedUploadURL, uploadStream, contentType2)
     };
     let sha256Hash = void 0;
     const blobUploadStream = new stream.PassThrough();
-    const hashStream = crypto2.createHash("sha256");
+    const hashStream = crypto3.createHash("sha256");
     uploadStream.pipe(blobUploadStream);
     uploadStream.pipe(hashStream).setEncoding("hex");
     info("Beginning upload of artifact content to blob storage");
@@ -116677,7 +116696,7 @@ function uploadArtifact(name, files, rootDirectory, options) {
 init_import_meta_url();
 var import_promises3 = __toESM(require("fs/promises"), 1);
 var fsSync = __toESM(require("fs"), 1);
-var crypto3 = __toESM(require("crypto"), 1);
+var crypto4 = __toESM(require("crypto"), 1);
 var stream3 = __toESM(require("stream"), 1);
 var path7 = __toESM(require("path"), 1);
 
@@ -120834,7 +120853,7 @@ function streamExtractExternal(url_1, directory_1) {
         clearTimeout(timer);
         reject(error2);
       };
-      const hashStream = crypto3.createHash("sha256").setEncoding("hex");
+      const hashStream = crypto4.createHash("sha256").setEncoding("hex");
       const passThrough = new stream3.PassThrough().on("data", () => {
         timer.refresh();
       }).on("error", onError);
@@ -121619,7 +121638,7 @@ var IS_WINDOWS7 = process.platform === "win32";
 init_import_meta_url();
 
 // node_modules/@actions/cache/lib/internal/cacheUtils.js
-var crypto4 = __toESM(require("crypto"), 1);
+var crypto5 = __toESM(require("crypto"), 1);
 var fs8 = __toESM(require("fs"), 1);
 var path8 = __toESM(require("path"), 1);
 var semver = __toESM(require_semver2(), 1);
@@ -121698,7 +121717,7 @@ function createTempDirectory() {
       }
       tempDirectory = path8.join(baseLocation, "actions", "temp");
     }
-    const dest = path8.join(tempDirectory, crypto4.randomUUID());
+    const dest = path8.join(tempDirectory, crypto5.randomUUID());
     yield mkdirP(dest);
     return dest;
   });
@@ -121766,7 +121785,7 @@ function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false)
     components.push("windows-only");
   }
   components.push(versionSalt);
-  return crypto4.createHash("sha256").update(components.join("|")).digest("hex");
+  return crypto5.createHash("sha256").update(components.join("|")).digest("hex");
 }
 function getRuntimeToken2() {
   const token = process.env["ACTIONS_RUNTIME_TOKEN"];
@@ -123715,7 +123734,7 @@ function restoreCacheV2(paths_1, primaryKey_1, restoreKeys_1, options_1) {
 
 // node_modules/@actions/tool-cache/lib/tool-cache.js
 init_import_meta_url();
-var crypto5 = __toESM(require("crypto"), 1);
+var crypto6 = __toESM(require("crypto"), 1);
 var fs10 = __toESM(require("fs"), 1);
 
 // node_modules/@actions/tool-cache/lib/manifest.js
@@ -123840,7 +123859,7 @@ var IS_MAC = process.platform === "darwin";
 var userAgent2 = "actions/tool-cache";
 function downloadTool(url2, dest, auth2, headers) {
   return __awaiter27(this, void 0, void 0, function* () {
-    dest = dest || path11.join(_getTempDirectory(), crypto5.randomUUID());
+    dest = dest || path11.join(_getTempDirectory(), crypto6.randomUUID());
     yield mkdirP(path11.dirname(dest));
     debug(`Downloading ${url2}`);
     debug(`Destination ${dest}`);
@@ -124019,7 +124038,7 @@ function extractZipNix(file, dest) {
 function _createExtractFolder(dest) {
   return __awaiter27(this, void 0, void 0, function* () {
     if (!dest) {
-      dest = path11.join(_getTempDirectory(), crypto5.randomUUID());
+      dest = path11.join(_getTempDirectory(), crypto6.randomUUID());
     }
     yield mkdirP(dest);
     return dest;
@@ -124127,16 +124146,10 @@ function getPlatformVars(version4) {
   ]);
   const builddir = builddirOutput.stdout.trim();
   debug(`builddir: ${builddir}`);
-  const variablesForPostFile = process.env.GITHUB_STATE;
-  if (variablesForPostFile === void 0) {
-    throw new Error("'GITHUB_STATE' environment variable not set");
-  }
-  debug("Writing to GITHUB_STATE file");
   const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
-  await (0, import_promises4.appendFile)(variablesForPostFile, `builddir=${builddir}
-cachePrefix=${cachePrefix}`, {
-    encoding: "utf8"
-  });
+  debug("Saving state for post step");
+  saveState("builddir", builddir);
+  saveState("cachePrefix", cachePrefix);
   debug("Getting affected files");
   const matchedCache = await restoreCache([archive], cachePrefix, [
     cachePrefix
