@@ -6,6 +6,7 @@ import {
   error,
   getInput,
   info,
+  saveState,
   setFailed,
   warning,
 } from "@actions/core";
@@ -15,7 +16,7 @@ import { promisify } from "node:util";
 import { join } from "node:path";
 import { execFile as execFileCallback } from "node:child_process";
 import { existsSync } from "node:fs";
-import { appendFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { archive } from "./common.mjs";
 const execFile = promisify(execFileCallback);
 
@@ -116,21 +117,10 @@ function getPlatformVars(version: string): {
   ]);
   const builddir = builddirOutput.stdout.trim();
   debug(`builddir: ${builddir}`);
-  const variablesForPostFile = process.env.GITHUB_STATE;
-  if (variablesForPostFile === undefined) {
-    throw new Error("'GITHUB_STATE' environment variable not set");
-  }
-
-  debug("Writing to GITHUB_STATE file");
-
   const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
-  await appendFile(
-    variablesForPostFile,
-    `builddir=${builddir}\ncachePrefix=${cachePrefix}`,
-    {
-      encoding: "utf8",
-    },
-  );
+  debug("Saving state for post step");
+  saveState("builddir", builddir);
+  saveState("cachePrefix", cachePrefix);
 
   debug("Getting affected files");
   const matchedCache = await restoreCache([archive], cachePrefix, [
