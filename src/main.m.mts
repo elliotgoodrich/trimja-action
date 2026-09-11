@@ -153,7 +153,10 @@ function getPlatformVars(version: string): {
     `${hash}..HEAD`,
   ]);
 
-  const affectedFiles = affected.stdout.trimEnd().split("\n");
+  const affectedFiles = affected.stdout
+    .split(/\r?\n/)
+    .map((f) => f.trim())
+    .filter((f) => f.length > 0);
   info(`The following files have been changed between ${hash}..HEAD:`);
   info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
 
@@ -164,7 +167,7 @@ function getPlatformVars(version: string): {
   const affectedFilesFile = join("trimja-cache", "affected.txt");
   await writeFile(
     affectedFilesFile,
-    `${affected.stdout}\n${extraAffectedFiles.join("\n")}`,
+    [...affectedFiles, ...extraAffectedFiles].join("\n"),
   );
 
   const args = [

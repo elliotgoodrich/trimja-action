@@ -124188,13 +124188,12 @@ ${extracted.stdout}`);
     "--name-only",
     `${hash}..HEAD`
   ]);
-  const affectedFiles = affected.stdout.trimEnd().split("\n");
+  const affectedFiles = affected.stdout.split(/\r?\n/).map((f) => f.trim()).filter((f) => f.length > 0);
   info(`The following files have been changed between ${hash}..HEAD:`);
   info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
   const extraAffectedFiles = getInput("affected").split(/\r?\n/).map((f) => f.trim()).filter((f) => f.length > 0);
   const affectedFilesFile = (0, import_node_path3.join)("trimja-cache", "affected.txt");
-  await (0, import_promises4.writeFile)(affectedFilesFile, `${affected.stdout}
-${extraAffectedFiles.join("\n")}`);
+  await (0, import_promises4.writeFile)(affectedFilesFile, [...affectedFiles, ...extraAffectedFiles].join("\n"));
   const args = [
     "--file",
     ninjaFile,
