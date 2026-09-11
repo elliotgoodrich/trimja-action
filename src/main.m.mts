@@ -4,6 +4,7 @@ import {
   addPath,
   debug,
   error,
+  getBooleanInput,
   getInput,
   info,
   saveState,
@@ -180,10 +181,10 @@ function getPlatformVars(version: string): {
   for (const target of targets) {
     args.push("--target", target);
   }
-  if (getInput("target-default") === "true") {
+  if (getBooleanInput("target-default")) {
     args.push("--target-default");
   }
-  if (getInput("explain") === "true") {
+  if (getBooleanInput("explain")) {
     args.push("--explain");
   }
 
