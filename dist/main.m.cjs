@@ -124099,126 +124099,122 @@ function getPlatformVars(version4) {
       throw new Error(`Unsupported platform ${process.platform}`);
   }
 }
-try {
-  (async () => {
-    var _a;
-    const buildConfig = getInput("build-configuration");
-    if (buildConfig.length > 100) {
-      throw new Error(`build-configuration is ${buildConfig.length} and it cannot be longer than 100 characters`);
-    }
-    const version4 = getInput("version");
-    const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version4}`;
-    const { filename, ext, extract } = getPlatformVars(version4);
-    const URL3 = `${URLBase}/${filename}${ext}`;
-    debug(`Starting Download of ${URL3}`);
-    const trimjaArchive = await downloadTool(URL3);
-    debug(`Extracting ${trimjaArchive}`);
-    const trimjaFolder = await extract(trimjaArchive, "trimja-install");
-    debug(`Extracted successfully to ${trimjaFolder}`);
-    const trimjaDir = (0, import_node_path3.join)(trimjaFolder, filename, "bin");
-    debug(`Adding ${trimjaDir} to the path`);
-    addPath(trimjaDir);
-    await exec("trimja", ["--version"]);
-    const ninjaFile = getInput("path");
-    debug(`$ trimja --file ${ninjaFile} --builddir`);
-    const builddirOutput = await execFile("trimja", [
-      "--file",
-      ninjaFile,
-      "--builddir"
-    ]);
-    const builddir = builddirOutput.stdout.trim();
-    debug(`builddir: ${builddir}`);
-    const variablesForPostFile = process.env.GITHUB_STATE;
-    if (variablesForPostFile === void 0) {
-      throw new Error("'GITHUB_STATE' environment variable not set");
-    }
-    debug("Writing to GITHUB_STATE file");
-    const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
-    await (0, import_promises4.appendFile)(variablesForPostFile, `builddir=${builddir}
+(async () => {
+  var _a;
+  const buildConfig = getInput("build-configuration");
+  if (buildConfig.length > 100) {
+    throw new Error(`build-configuration is ${buildConfig.length} and it cannot be longer than 100 characters`);
+  }
+  const version4 = getInput("version");
+  const URLBase = `https://github.com/elliotgoodrich/trimja/releases/download/v${version4}`;
+  const { filename, ext, extract } = getPlatformVars(version4);
+  const URL3 = `${URLBase}/${filename}${ext}`;
+  debug(`Starting Download of ${URL3}`);
+  const trimjaArchive = await downloadTool(URL3);
+  debug(`Extracting ${trimjaArchive}`);
+  const trimjaFolder = await extract(trimjaArchive, "trimja-install");
+  debug(`Extracted successfully to ${trimjaFolder}`);
+  const trimjaDir = (0, import_node_path3.join)(trimjaFolder, filename, "bin");
+  debug(`Adding ${trimjaDir} to the path`);
+  addPath(trimjaDir);
+  await exec("trimja", ["--version"]);
+  const ninjaFile = getInput("path");
+  debug(`$ trimja --file ${ninjaFile} --builddir`);
+  const builddirOutput = await execFile("trimja", [
+    "--file",
+    ninjaFile,
+    "--builddir"
+  ]);
+  const builddir = builddirOutput.stdout.trim();
+  debug(`builddir: ${builddir}`);
+  const variablesForPostFile = process.env.GITHUB_STATE;
+  if (variablesForPostFile === void 0) {
+    throw new Error("'GITHUB_STATE' environment variable not set");
+  }
+  debug("Writing to GITHUB_STATE file");
+  const cachePrefix = `TRIMJA-${process.platform}-${buildConfig}`;
+  await (0, import_promises4.appendFile)(variablesForPostFile, `builddir=${builddir}
 cachePrefix=${cachePrefix}`, {
-      encoding: "utf8"
-    });
-    debug("Getting affected files");
-    const matchedCache = await restoreCache([archive], cachePrefix, [
-      cachePrefix
-    ]);
-    if (matchedCache === void 0) {
-      info("No cache found, skipping trimja");
-      return;
-    }
-    debug("Extracting ninja files");
-    await extractTar2(archive, builddir);
-    const extracted = await execFile("tar", ["-tzvf", archive]);
-    debug(`Extracted the following files to ${builddir}:
+    encoding: "utf8"
+  });
+  debug("Getting affected files");
+  const matchedCache = await restoreCache([archive], cachePrefix, [
+    cachePrefix
+  ]);
+  if (matchedCache === void 0) {
+    info("No cache found, skipping trimja");
+    return;
+  }
+  debug("Extracting ninja files");
+  await extractTar2(archive, builddir);
+  const extracted = await execFile("tar", ["-tzvf", archive]);
+  debug(`Extracted the following files to ${builddir}:
 ${extracted.stdout}`);
-    const hash = matchedCache.slice(cachePrefix.length);
-    debug(`Attempting to fetch ${hash}...`);
-    try {
-      await execFile("git", ["fetch", "origin", hash, "--depth=1"]);
-      debug(`...Successfully fetched ${hash}`);
-    } catch (e) {
-      warning(`...Failed to fetch ${hash}, skipping trimja`);
-      return;
-    }
-    const affected = await execFile("git", [
-      "diff",
-      "--name-only",
-      `${hash}..HEAD`
-    ]);
-    const affectedFiles = affected.stdout.trimEnd().split("\n");
-    info(`The following files have been changed between ${hash}..HEAD:`);
-    info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
-    const extraAffectedFiles = getInput("affected").split(/\r?\n/).map((f) => f.trim()).filter((f) => f.length > 0);
-    const affectedFilesFile = (0, import_node_path3.join)("trimja-cache", "affected.txt");
-    await (0, import_promises4.writeFile)(affectedFilesFile, `${affected.stdout}
+  const hash = matchedCache.slice(cachePrefix.length);
+  debug(`Attempting to fetch ${hash}...`);
+  try {
+    await execFile("git", ["fetch", "origin", hash, "--depth=1"]);
+    debug(`...Successfully fetched ${hash}`);
+  } catch (e) {
+    warning(`...Failed to fetch ${hash}, skipping trimja`);
+    return;
+  }
+  const affected = await execFile("git", [
+    "diff",
+    "--name-only",
+    `${hash}..HEAD`
+  ]);
+  const affectedFiles = affected.stdout.trimEnd().split("\n");
+  info(`The following files have been changed between ${hash}..HEAD:`);
+  info(affectedFiles.map((a) => `  - ${a}`).join("\n"));
+  const extraAffectedFiles = getInput("affected").split(/\r?\n/).map((f) => f.trim()).filter((f) => f.length > 0);
+  const affectedFilesFile = (0, import_node_path3.join)("trimja-cache", "affected.txt");
+  await (0, import_promises4.writeFile)(affectedFilesFile, `${affected.stdout}
 ${extraAffectedFiles.join("\n")}`);
-    const args = [
-      "--file",
-      ninjaFile,
-      "--affected",
-      affectedFilesFile,
-      "--write"
-    ];
-    const targets = getInput("targets").split(/\r?\n/).map((t) => t.trim()).filter((t) => t.length > 0);
-    for (const target of targets) {
-      args.push("--target", target);
+  const args = [
+    "--file",
+    ninjaFile,
+    "--affected",
+    affectedFilesFile,
+    "--write"
+  ];
+  const targets = getInput("targets").split(/\r?\n/).map((t) => t.trim()).filter((t) => t.length > 0);
+  for (const target of targets) {
+    args.push("--target", target);
+  }
+  if (getInput("target-default") === "true") {
+    args.push("--target-default");
+  }
+  if (getInput("explain") === "true") {
+    args.push("--explain");
+  }
+  debug(`$ trimja ${args.join(" ")}`);
+  try {
+    const { stdout, stderr } = await execFile("trimja", args, {
+      maxBuffer: 64 * 1024 * 1024
+    });
+    info(stdout);
+    if (stderr) {
+      info(stderr);
     }
-    if (getInput("target-default") === "true") {
-      args.push("--target-default");
-    }
-    if (getInput("explain") === "true") {
-      args.push("--explain");
-    }
-    debug(`$ trimja ${args.join(" ")}`);
-    try {
-      const { stdout, stderr } = await execFile("trimja", args, {
-        maxBuffer: 64 * 1024 * 1024
-      });
-      info(stdout);
-      if (stderr) {
-        info(stderr);
-      }
-    } catch (e) {
-      const err = e;
-      error(`trimja failed \u2014 exit code ${(_a = err.code) !== null && _a !== void 0 ? _a : "null"}${err.signal ? `, killed by signal ${err.signal}` : ""}`);
-      if (err.stdout) {
-        info(`stdout:
+  } catch (e) {
+    const err = e;
+    error(`trimja failed \u2014 exit code ${(_a = err.code) !== null && _a !== void 0 ? _a : "null"}${err.signal ? `, killed by signal ${err.signal}` : ""}`);
+    if (err.stdout) {
+      info(`stdout:
 ${err.stdout}`);
-      }
-      if (err.stderr) {
-        error(`stderr:
-${err.stderr}`);
-      }
-      if (err.signal === "SIGKILL") {
-        warning(`SIGKILL usually means the runner ran out of memory (OOM killer). Check the ${ninjaFile} size or use a larger runner.`);
-      }
-      await uploadCrashReport(ninjaFile, affectedFilesFile, builddir);
-      throw e;
     }
-  })();
-} catch (e) {
-  setFailed(e);
-}
+    if (err.stderr) {
+      error(`stderr:
+${err.stderr}`);
+    }
+    if (err.signal === "SIGKILL") {
+      warning(`SIGKILL usually means the runner ran out of memory (OOM killer). Check the ${ninjaFile} size or use a larger runner.`);
+    }
+    await uploadCrashReport(ninjaFile, affectedFilesFile, builddir);
+    throw e;
+  }
+})().catch((e) => setFailed(e instanceof Error ? e : String(e)));
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:

@@ -68154,32 +68154,28 @@ var import_node_path2 = require("node:path");
 var archive = (0, import_node_path2.join)("trimja-cache", "ninjafiles.tar.gz");
 
 // .ninja/post.m.mjs
-try {
-  (async () => {
-    const builddir = process.env.STATE_builddir;
-    if (builddir === void 0) {
-      throw new Error("Unable to find builddir");
-    }
-    const cachePrefix = process.env.STATE_cachePrefix;
-    if (cachePrefix === void 0) {
-      throw new Error("Unable to find cachePrefix");
-    }
-    info(`Found ninja output directory: ${builddir}`);
-    const HASH = process.env.GITHUB_SHA;
-    if (HASH === void 0) {
-      throw new Error("Cannot find 'GITHUB_SHA' environment variable");
-    }
-    const files = [".ninja_log", ".ninja_deps"].filter((f) => (0, import_node_fs2.existsSync)((0, import_node_path3.join)(builddir, f)));
-    await (0, import_promises.mkdir)("trimja-cache", { recursive: true });
-    info(`Creating ${archive}`);
-    await exec("tar", ["-czvf", archive, "-C", builddir, ...files]);
-    const key = `${cachePrefix}${HASH}`;
-    info(`Saving cache '${key}'`);
-    await saveCache2([archive], key);
-  })();
-} catch (e) {
-  setFailed(e);
-}
+(async () => {
+  const builddir = process.env.STATE_builddir;
+  if (builddir === void 0) {
+    throw new Error("Unable to find builddir");
+  }
+  const cachePrefix = process.env.STATE_cachePrefix;
+  if (cachePrefix === void 0) {
+    throw new Error("Unable to find cachePrefix");
+  }
+  info(`Found ninja output directory: ${builddir}`);
+  const HASH = process.env.GITHUB_SHA;
+  if (HASH === void 0) {
+    throw new Error("Cannot find 'GITHUB_SHA' environment variable");
+  }
+  const files = [".ninja_log", ".ninja_deps"].filter((f) => (0, import_node_fs2.existsSync)((0, import_node_path3.join)(builddir, f)));
+  await (0, import_promises.mkdir)("trimja-cache", { recursive: true });
+  info(`Creating ${archive}`);
+  await exec("tar", ["-czvf", archive, "-C", builddir, ...files]);
+  const key = `${cachePrefix}${HASH}`;
+  info(`Saving cache '${key}'`);
+  await saveCache2([archive], key);
+})().catch((e) => setFailed(e instanceof Error ? e : String(e)));
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:
