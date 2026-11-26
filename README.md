@@ -140,7 +140,10 @@ However, there are a few situations where more commands may be included:
 
 There are a few situations where `trimja` may exclude more commands than expected:
 
-  1. Your ninja build file may not correctly capture all dependencies.
+  1. Your ninja build file may not correctly capture all dependencies. See
+     [Common Pitfalls](https://github.com/elliotgoodrich/trimja#common-pitfalls)
+     in the `trimja` README for changes that `trimja` can't see and how to fix
+     them.
   2. When pushing commits to a pull request, `trimja-action` compares the changes
      to the last successful build on that pull request. If a change does not
      affect any dependencies, no work is expected to be done.
